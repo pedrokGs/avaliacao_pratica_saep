@@ -1,0 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sistema/features/auth/data/datasource/auth_remote_data_source_firebase.dart';
+import 'package:sistema/features/auth/data/repository/auth_repository_impl.dart';
+import 'package:sistema/features/auth/domain/usecases/sign_in_use_case.dart';
+import 'package:sistema/features/auth/domain/usecases/sign_out_use_case.dart';
+import 'package:sistema/features/auth/domain/usecases/sign_up_use_case.dart';
+import 'package:sistema/features/products/data/datasource/produto_remote_datasource_firestore.dart';
+import 'package:sistema/features/products/data/repository/produto_repository_impl.dart';
+import 'package:sistema/features/products/domain/usecases/create_produto_use_case.dart';
+import 'package:sistema/features/products/domain/usecases/delete_produto_use_case.dart';
+import 'package:sistema/features/products/domain/usecases/get_produtos_use_case.dart';
+import 'package:sistema/features/products/domain/usecases/update_produto_use_case.dart';
+
+final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
+final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+final authRemoteDataSourceProvider = Provider((ref) => AuthRemoteDataSourceFirebase(firebaseAuth: ref.watch(firebaseAuthProvider)),);
+final authRepositoryProvider = Provider((ref) => AuthRepositoryImpl(authRemoteDataSource: ref.watch(authRemoteDataSourceProvider)),);
+final signInUseCaseProvider = Provider((ref) => SignInUseCase(authRepository: ref.watch(authRepositoryProvider)),);
+final signUpUseCaseProvider = Provider((ref) => SignUpUseCase(authRepository: ref.watch(authRepositoryProvider)),);
+final signOutUseCaseProvider = Provider((ref) => SignOutUseCase(authRepository: ref.watch(authRepositoryProvider)),);
+final authUserProvider = Provider<User?>((ref) => ref.watch(authRepositoryProvider).getCurrentUser);
+
+final produtoRemoteDatasourceProvider = Provider((ref) => ProdutoRemoteDatasourceFirestore(firestore: ref.watch(firestoreProvider)),);
+final produtoRepositoryProvider = Provider((ref) => ProdutoRepositoryImpl(remoteDatasource: ref.watch(produtoRemoteDatasourceProvider)),);
+final createProdutoUseCaseProvider = Provider((ref) => CreateProdutoUseCase(repository: ref.watch(produtoRepositoryProvider)),);
+final getProdutosUseCaseProvider = Provider((ref) => GetProdutosUseCase(repository: ref.watch(produtoRepositoryProvider)),);
+final updateProdutoUseCaseProvider = Provider((ref) => UpdateProdutoUseCase(repository: ref.watch(produtoRepositoryProvider)),);
+final deleteProdutoUseCaseProvider = Provider((ref) => DeleteProdutoUseCase(repository: ref.watch(produtoRepositoryProvider)),);
